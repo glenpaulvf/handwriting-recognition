@@ -1,7 +1,7 @@
 from scipy.misc import imread # using scipy's imread
 import cv2
 import numpy as np
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 
 
 ###############################################################################
@@ -223,7 +223,7 @@ print_test_results(prediction, truth)
 # Conditions: Test samples with length [4, 16] for training
 # Conditions: Shuffle data and target by permutating indexes
 
-print '-' * 80 # separator for checking portion
+print '-' * 80 # separator
 
 # Set to True to shuffle order of training samples
 DEBUG_CHECK_3 = False
@@ -273,5 +273,45 @@ for i in range(2, 20): # Performs Check 1 and Check 2 automatically
 # only incorrect when it was tested with a sample that for which it was not
 # trained. It was not dependent on any of the check factors.
 
-print '-' * 80 # separator for checking portion
+print '-' * 80 # separator
 
+
+## Train and test SVC
+
+for i in range(2, 20): # Performs Check 1 and Check 2 automatically
+    per = i / float(len(me_data))
+
+    data = me_data
+    target = me_target
+    
+    train_data, train_target, test_data, test_target = partition(data, target, per)
+    
+    #classifier = SVC(gamma=0.001)
+    classifier = SVC(gamma=0.001, kernel='poly')
+    classifier.fit(train_data, train_target)
+    prediction = classifier.predict(test_data)
+    truth = test_target
+    
+    print_test_results(prediction, truth)
+
+        # For debugging/error checking.
+    # Uncomment to use
+    print '[CHECK] Percentage of data for training:', per * 100., '%'
+    print '[CHECK] Training Size:', per * len(data), 'out of', float(len(data))
+
+    train_classes_output = ('[CHECK] Training Classes: ' + 
+                       np.array_str(np.unique(train_target)))
+    test_classes_output = ('[CHECK] Test Classes: ' + 
+                       np.array_str(np.unique(test_target)))
+    training_sample = '[CHECK] Training Sample: ' + np.array_str(train_target)
+    test_error = '[CHECK] Test Errors: ' + np.array_str(np.extract(np.not_equal(prediction, truth), prediction))
+        
+    print (training_sample + '\n' +
+           train_classes_output + '\n' +
+           test_classes_output + '\n' +
+           test_error + '\n')
+
+# Analysis:
+# The classifier did not work very well in these cases.
+
+print '-' * 80 # separator
