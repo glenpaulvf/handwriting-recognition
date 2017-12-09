@@ -86,9 +86,75 @@ for img in imgs_c:
             (5, 5),
             interpolation=cv2.INTER_AREA))    
 
-# 8x8 images of letters a, b, c
+# 5x5 images of letters a, b, c
 images_abc = np.array(resized_a + resized_b + resized_c)
 
 # Convert to (samples, feature) matrix by flattening
 num = len(images_abc)
 data = images_abc.reshape((num, -1))
+
+
+###############################################################################
+# Recognizing own handwiring
+###############################################################################
+
+## Create target and data
+    
+# Assembly target, respective to alphabet
+
+me_target_glen = [7, 12, 5, 14]*5 # collated
+me_target = np.array(me_target_glen)
+
+# Read columns of images in grayscale
+me_column_g = imread('me_g.png', flatten = True)
+me_column_l = imread('me_l.png', flatten = True)
+me_column_e = imread('me_e.png', flatten = True)
+me_column_n = imread('me_n.png', flatten = True)
+
+# Separate columns into arrays of cropped images
+me_imgs_g = separate(me_column_g)
+me_imgs_l = separate(me_column_l)
+me_imgs_e = separate(me_column_e)
+me_imgs_n = separate(me_column_n)
+
+# Resize images to 5px
+me_resized_g = []
+for img in me_imgs_g:
+    me_resized_g.append(cv2.resize(
+            img,
+            (5, 5),
+            interpolation=cv2.INTER_AREA))
+
+me_resized_l = []
+for img in me_imgs_l:
+    me_resized_l.append(cv2.resize(
+            img,
+            (5, 5),
+            interpolation=cv2.INTER_AREA))
+    
+me_resized_e = []
+for img in me_imgs_e:
+    me_resized_e.append(cv2.resize(
+            img,
+            (5, 5),
+            interpolation=cv2.INTER_AREA))
+    
+me_resized_n = []
+for img in me_imgs_n:
+    me_resized_n.append(cv2.resize(
+            img,
+            (5, 5),
+            interpolation=cv2.INTER_AREA))
+
+# Collate images
+me_images_collate = []
+for x in zip(me_resized_g, me_resized_l, me_resized_e, me_resized_n):
+    for y in x:
+        me_images_collate.append(y)
+
+# 5x5 images of letters g, l, e, n
+images_glen = np.array(me_images_collate)
+
+# Convert to (samples, feature) matrix by flattening
+num = len(images_glen)
+data = images_glen.reshape((num, -1))
