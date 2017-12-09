@@ -158,3 +158,24 @@ images_glen = np.array(me_images_collate)
 # Convert to (samples, feature) matrix by flattening
 num = len(images_glen)
 data = images_glen.reshape((num, -1))
+
+
+## Partition data and target into training and test sets
+
+def partition(data, target, p):
+    '''
+    Partition data and target for training
+    Remaining data and target for testing
+    
+    Since data and target are not ordered (they're collated),
+    we simply select the first N samples, where N = p * len of data/target.
+    '''
+    
+    slice_index = len(data) * p
+    
+    train_data = data[:int(slice_index)]
+    train_target = target[:int(slice_index)]
+    test_data = data[int(slice_index):]
+    test_target = target[int(slice_index):]
+
+    return train_data, train_target, test_data, test_target
