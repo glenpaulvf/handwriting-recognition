@@ -1,7 +1,6 @@
 from scipy.misc import imread # using scipy's imread
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.svm import LinearSVC
 
 
@@ -185,21 +184,18 @@ def partition(data, target, p):
 #per = input('Percentage of data for training [1-100]: ') # percentage
 per = 20 / 100.
 
-print 'Percentage of data for training:', per * 100., '%'
-
 data = me_data
 target = me_target
 
-print 'Training Size:', per * len(data), 'out of', float(len(data))
-
 train_data, train_target, test_data, test_target = partition(data, target, per)
-    
+
 ## Train and test LinearSVC
 
 classifier = LinearSVC()
 classifier.fit(train_data, train_target)
 prediction = classifier.predict(test_data)
 truth = test_target
+
 
 ## Format output
 
@@ -210,7 +206,72 @@ def print_test_results(prediction, truth):
     accuracy = np.sum(np.equal(prediction, truth)) / float(len(truth)) * 100.0
     accuracy_output = 'Accuracy:\t' + str(accuracy) + ' %'
         
-    print prediction_output + '\n' + truth_output + '\n' + accuracy_output
+    print (prediction_output + '\n' + 
+           truth_output + '\n' + 
+           accuracy_output + '\n')
     
-    
+        
 print_test_results(prediction, truth)
+
+
+## Checking LinearSVC Performance
+
+# Check 1: Different samples for training and testing
+# Check 2: Number of training samples for each class is not necessarily equal
+# Check 3: Order of training samples are different
+#
+# Conditions: Test samples with length [4, 16] for training
+# Conditions: Shuffle data and target by permutating indexes
+
+print '-' * 80 # separator for checking portion
+
+# Set to True to shuffle order of training samples
+DEBUG_CHECK_3 = False
+
+data = me_data
+target = me_target
+
+for i in range(2, 20): # Performs Check 1 and Check 2 automatically
+    per = i / float(len(me_data))
+    
+    if DEBUG_CHECK_3:
+        index = np.random.permutation(me_data.shape[0])
+        
+        data = me_data[index]
+        target = me_target[index]
+
+
+    train_data, train_target, test_data, test_target = partition(
+                                                            data, target, per)
+    
+    classifier = LinearSVC()
+    classifier.fit(train_data, train_target)
+    prediction = classifier.predict(test_data)
+    truth = test_target
+    print_test_results(prediction, truth)
+
+    # For debugging/error checking.
+    # Uncomment to use
+    print '[CHECK] Percentage of data for training:', per * 100., '%'
+    print '[CHECK] Training Size:', per * len(data), 'out of', float(len(data))
+
+    train_classes_output = ('[CHECK] Training Classes: ' + 
+                       np.array_str(np.unique(train_target)))
+    test_classes_output = ('[CHECK] Test Classes: ' + 
+                       np.array_str(np.unique(test_target)))
+    training_sample = '[CHECK] Training Sample: ' + np.array_str(train_target)
+    test_error = '[CHECK] Test Errors: ' + np.array_str(np.extract(np.not_equal(prediction, truth), prediction))
+        
+    print (training_sample + '\n' +
+           train_classes_output + '\n' +
+           test_classes_output + '\n' +
+           test_error + '\n')
+
+# Analysis:
+# The classifier had consistent behavior throughout checking, as long as the
+# training sample contained all classes of the test sample. The classifier was
+# only incorrect when it was tested with a sample that for which it was not
+# trained. It was not dependent on any of the check factors.
+
+print '-' * 80 # separator for checking portion
+
