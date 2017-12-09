@@ -2,6 +2,7 @@ from scipy.misc import imread # using scipy's imread
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.svm import LinearSVC
 
 
 ###############################################################################
@@ -157,7 +158,7 @@ images_glen = np.array(me_images_collate)
 
 # Convert to (samples, feature) matrix by flattening
 num = len(images_glen)
-data = images_glen.reshape((num, -1))
+me_data = images_glen.reshape((num, -1))
 
 
 ## Partition data and target into training and test sets
@@ -179,3 +180,37 @@ def partition(data, target, p):
     test_target = target[int(slice_index):]
 
     return train_data, train_target, test_data, test_target
+
+
+#per = input('Percentage of data for training [1-100]: ') # percentage
+per = 20 / 100.
+
+print 'Percentage of data for training:', per * 100., '%'
+
+data = me_data
+target = me_target
+
+print 'Training Size:', per * len(data), 'out of', float(len(data))
+
+train_data, train_target, test_data, test_target = partition(data, target, per)
+    
+## Train and test LinearSVC
+
+classifier = LinearSVC()
+classifier.fit(train_data, train_target)
+prediction = classifier.predict(test_data)
+truth = test_target
+
+## Format output
+
+def print_test_results(prediction, truth):
+    prediction_output = 'Predicted:\t' + np.array_str(prediction)
+    truth_output = 'Truth:\t' + np.array_str(truth)
+    
+    accuracy = np.sum(np.equal(prediction, truth)) / float(len(truth)) * 100.0
+    accuracy_output = 'Accuracy:\t' + str(accuracy) + ' %'
+        
+    print prediction_output + '\n' + truth_output + '\n' + accuracy_output
+    
+    
+print_test_results(prediction, truth)
