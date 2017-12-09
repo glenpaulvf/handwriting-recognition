@@ -286,8 +286,7 @@ for i in range(2, 20): # Performs Check 1 and Check 2 automatically
     
     train_data, train_target, test_data, test_target = partition(data, target, per)
     
-    #classifier = SVC(gamma=0.001)
-    classifier = SVC(gamma=0.001, kernel='poly')
+    classifier = SVC(kernel='linear')
     classifier.fit(train_data, train_target)
     prediction = classifier.predict(test_data)
     truth = test_target
